@@ -19,6 +19,10 @@ async function fixture(t) {
   const server = createApp(config, manager).listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   const url = `http://127.0.0.1:${server.address().port}`;
+  // Startup recovery writes the credential store asynchronously; finish it before teardown.
+  const ready = await fetch(url + '/setup/api/requests', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+  assert.equal(ready.status, 400);
+  await ready.text();
   t.after(async () => { await manager.idle(); await new Promise(resolve => server.close(resolve)); await rm(root, { recursive: true, force: true }); });
   return { root, config, manager, url };
 }
