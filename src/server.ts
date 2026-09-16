@@ -40,7 +40,7 @@ export function createApp(config: Config, manager: Manager, metrics?: Metrics) {
     } catch { await rm(file, { force: true }); if (!res.headersSent) res.status(400).json({ error: 'Upload failed or exceeds 25 MiB' }); }
   });
   app.post('/mcp', express.json({ limit: '1mb' }), async (req, res) => {
-    const server = new McpServer({ name: 'local-sites', version: '0.1.0' });
+    const server = new McpServer({ name: 'local-sites', version: '0.1.0-beta.0' });
     const owner = res.locals.owner as string;
     const tool = (name: string, description: string, inputSchema: any, operation: (args: any) => Promise<unknown> | unknown, readOnly = false) => {
       server.registerTool(name, { description, inputSchema, annotations: { readOnlyHint: readOnly, destructiveHint: !readOnly, openWorldHint: false } }, async (args: any) => {

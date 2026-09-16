@@ -1,6 +1,12 @@
 # local-sites
 
-Codex から LAN 内の Ubuntu に小さな Web アプリを配置・管理する MCP サーバーとプラグインです。
+> Turn Codex into your private LAN app platform.
+
+**Version 0.1 β** — 改良中のベータ版です。
+
+[English README](README.en.md)
+
+Codex から LAN 内の Ubuntu に小さな Web アプリを配置・管理する、セルフホスト型の MCP サーバーとプラグインです。
 
 ## 提供するもの
 
@@ -53,4 +59,8 @@ node scripts/check-publication.mjs
 
 `npm start` はlocalhost:3100で起動します。実際の配置にはDocker、公開アクセスには構成済みのCaddyが必要です。
 
-[検証範囲](docs/verification-ja.md)と[公開時の情報管理](docs/security-ja.md)を参照してください。ライセンスは未設定です。
+[検証範囲](docs/verification-ja.md)と[公開時の情報管理](docs/security-ja.md)を参照してください。
+
+## ライセンス
+
+[MIT License](LICENSE) で公開しています。
