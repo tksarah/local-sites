@@ -6,7 +6,9 @@
 
 [English README](README.en.md)
 
-Codex から LAN 内の Ubuntu に小さな Web アプリを配置・管理する、セルフホスト型の MCP サーバーとプラグインです。
+local-sites is a self-hosted LAN application platform for AI coding agents. It exposes application deployment and lifecycle management through MCP, with a Codex plugin for seamless integration.
+
+local-sites は、AIコーディングエージェントからMCP経由で操作できる、セルフホスト型のLAN向けWebアプリケーション基盤です。Codex向けPluginを同梱し、生成したWebアプリを自宅や社内のUbuntu環境へそのまま配置・管理できます。
 
 ## 提供するもの
 
