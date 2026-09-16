@@ -1,0 +1,13 @@
+[Unit]
+Description=Local Sites DNS LAN access restriction
+After=network-online.target ufw.service
+Before=local-sites-dns.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/local-sites-dns-firewall start
+ExecStop=/usr/local/sbin/local-sites-dns-firewall stop
+
+[Install]
+WantedBy=multi-user.target

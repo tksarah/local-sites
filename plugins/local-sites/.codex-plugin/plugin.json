@@ -1,0 +1,20 @@
+{
+  "name": "local-sites",
+  "version": "0.2.0",
+  "description": "Ubuntu LAN application deployment over Streamable HTTP MCP",
+  "mcpServers": "./.mcp.json",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Local Sites",
+    "shortDescription": "LANアプリの配置・一覧・起動・停止・削除",
+    "longDescription": "Ubuntu LANサーバーへアプリを配置。管理ポータルで一覧・アクセス・起動・停止・削除を操作できます。",
+    "websiteURL": "https://github.com/tksarah/local-sites",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Local Sites のアプリ一覧と管理ポータルを表示してください。"
+  }
+}

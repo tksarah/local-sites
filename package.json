@@ -1,0 +1,7 @@
+{
+  "name": "local-sites", "version": "0.1.0", "private": true, "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "build": "tsc", "start": "node dist/server.js", "test": "npm run build && node --test tests/*.test.mjs" },
+  "dependencies": { "@modelcontextprotocol/sdk": "1.30.0", "express": "^5.1.0", "tar": "^7.5.0", "zod": "^3.25.0" },
+  "devDependencies": { "@types/express": "^5.0.0", "@types/node": "^22.0.0", "typescript": "^5.9.0" }
+}

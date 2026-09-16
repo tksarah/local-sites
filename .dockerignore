@@ -1,0 +1,14 @@
+*
+!package.json
+!package-lock.json
+!tsconfig.json
+!src
+!src/**
+
+!windows-setup
+!windows-setup/**
+!plugins
+!plugins/**
+!scripts
+!scripts/build-setup.mjs
+!scripts/token.mjs

@@ -1,0 +1,12 @@
+{
+    auto_https disable_redirects
+    admin localhost:2019
+}
+import /etc/caddy/apps/*.caddy
+https://{$SITE_IP} {
+    bind {$SITE_IP}
+    tls internal
+    @outside not remote_ip {$LAN_CIDR} 127.0.0.1 ::1
+    respond @outside "LAN access only" 403
+    reverse_proxy 127.0.0.1:3100
+}

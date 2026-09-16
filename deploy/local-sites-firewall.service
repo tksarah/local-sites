@@ -1,0 +1,13 @@
+[Unit]
+Description=Restrict local-sites application ports to LAN
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/local-sites-firewall
+RemainAfterExit=yes
+
+[Install]
+WantedBy=docker.service

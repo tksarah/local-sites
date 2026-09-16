@@ -1,0 +1,1 @@
+{"mcpServers":{"local-sites":{"type":"http","url":"https://configure-before-use.invalid/mcp","bearer_token_env_var":"LOCAL_SITES_TOKEN"}}}

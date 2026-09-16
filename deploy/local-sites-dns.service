@@ -1,0 +1,20 @@
+[Unit]
+Description=Local Sites LAN DNS
+Wants=network-online.target
+After=network-online.target local-sites-dns-firewall.service
+Requires=local-sites-dns-firewall.service
+
+[Service]
+Type=simple
+ExecStartPre=/usr/sbin/dnsmasq --test --conf-file=/etc/local-sites/dnsmasq.conf
+ExecStart=/usr/sbin/dnsmasq --keep-in-foreground --conf-file=/etc/local-sites/dnsmasq.conf --user=nobody --group=nogroup --pid-file=
+Restart=on-failure
+RestartSec=3
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_SETUID CAP_SETGID CAP_NET_ADMIN
+
+[Install]
+WantedBy=multi-user.target

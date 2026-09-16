@@ -1,0 +1,12 @@
+import { readFile } from 'node:fs/promises';
+const [file] = process.argv.slice(2);
+const base = process.env.LOCAL_SITES_URL;
+if (!base.startsWith('https://')) throw new Error('HTTPS is required');
+if (!base || !base.startsWith('https://')) throw new Error('Set LOCAL_SITES_URL to your HTTPS server URL');
+const token = process.env.LOCAL_SITES_TOKEN || (process.env.LOCAL_SITES_TOKEN_FILE ? (await readFile(process.env.LOCAL_SITES_TOKEN_FILE, 'utf8')).trim() : '');
+if (!file || !token) throw new Error('Pass an archive and set LOCAL_SITES_TOKEN or LOCAL_SITES_TOKEN_FILE');
+const bytes = await readFile(file);
+if (bytes.length > 25 * 1024 * 1024) throw new Error('Archive exceeds 25 MiB');
+const response = await fetch(`${base}/uploads`, { method: 'POST', redirect: 'error', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/gzip' }, body: bytes, signal: AbortSignal.timeout(120000) });
+if (!response.ok) throw new Error(`Upload failed (${response.status}): ${await response.text()}`);
+console.log(await response.text());

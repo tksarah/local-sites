@@ -1,0 +1,48 @@
+services:
+  manager:
+    build:
+      context: ..
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      SITE_IP: ${SITE_IP:?Set SITE_IP in deploy/.env}
+      LAN_CIDR: ${LAN_CIDR:?Set LAN_CIDR in deploy/.env}
+      APP_DOMAIN: ${APP_DOMAIN:-}
+      DATA_DIR: /var/lib/local-sites
+      TOKEN_FILE: /var/lib/local-sites/tokens.json
+      BIND: 127.0.0.1
+      PORT: 3100
+      GATEWAY_CONTAINER: local-sites-gateway-1
+      METRICS_HOST_PROC: /host/proc
+      METRICS_HOST_ROOT: /host/root
+      METRICS_NETWORK_INTERFACE: ${METRICS_NETWORK_INTERFACE:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/local-sites:/var/lib/local-sites
+      - /proc:/host/proc:ro
+      - /:/host/root:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+  gateway:
+    image: caddy:2
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      SITE_IP: ${SITE_IP:?Set SITE_IP in deploy/.env}
+      LAN_CIDR: ${LAN_CIDR:?Set LAN_CIDR in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /var/lib/local-sites/gateway:/etc/caddy/apps:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+volumes:
+  caddy_data:
+  caddy_config:
