@@ -23,7 +23,7 @@ systemctl enable local-sites-firewall.service
 systemctl restart local-sites-firewall.service
 mkdir -p /var/lib/local-sites
 chmod 700 /var/lib/local-sites
-docker compose --env-file deploy/.env -p local-sites -f deploy/compose.yaml build manager
+docker compose --env-file deploy/.env -p local-sites -f deploy/compose.yaml build manager preview
 if [ ! -f /var/lib/local-sites/tokens.json ]; then
   docker compose --env-file deploy/.env -p local-sites -f deploy/compose.yaml run --rm --no-deps --entrypoint node manager scripts/token.mjs create primary
 fi

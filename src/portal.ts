@@ -22,7 +22,7 @@ export function portal(config: Config, manager: Manager, metrics?: Metrics) {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
-    res.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    res.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
     next();
   });
   router.get('/', (_req, res) => res.type('html').send(portalHtml));
@@ -88,7 +88,24 @@ export function portal(config: Config, manager: Manager, metrics?: Metrics) {
   router.post('/api/devices/requests/:id/approve', action(req=>enrollment.approve(String(req.params.id),String(req.body?.code||''))));
   router.post('/api/devices/requests/:id/reject', action(req=>enrollment.reject(String(req.params.id))));
   router.post('/api/devices/:name/revoke', action(req=>enrollment.revoke(String(req.params.name))));
-  router.get('/api/apps', action(() => manager.list()));
+  router.get('/api/apps', action(async () => (await manager.list()).map(app => ({ ...app, preview: manager.previews?.info(app.id) || { state: 'missing', mode: 'auto', url: null } }))));
+  const previews = () => { if (!manager.previews) throw Error('プレビュー機能を準備中です。'); return manager.previews; };
+  router.get('/api/apps/:id/preview/image', async (req, res) => {
+    try {
+      const data = await previews().image(String(req.params.id));
+      if (!data) { res.sendStatus(404); return; }
+      res.type('image/webp').send(data);
+    } catch { res.sendStatus(404); }
+  });
+  router.post('/api/apps/:id/preview/capture', action(req => previews().request(String(req.params.id))));
+  router.post('/api/apps/:id/preview/auto', action(req => previews().request(String(req.params.id), true)));
+  router.post('/api/apps/:id/preview/upload', express.raw({ type: ['image/png', 'image/jpeg', 'image/webp'], limit: '5mb' }), action(req => {
+    if (!Buffer.isBuffer(req.body)) throw Error('PNG・JPEG・WebPの画像を選択してください。');
+    return previews().upload(String(req.params.id), req.body);
+  }));
+  router.use('/api/apps/:id/preview/upload', (error: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    res.status(error.type === 'entity.too.large' ? 413 : 400).json({ error: '画像は5MB以下のPNG・JPEG・WebPを選択してください。' });
+  });
   router.get('/api/metrics/current', (_req, res) => {
     if (!metrics) { res.status(503).json({ error: 'リソース計測を準備中です' }); return; }
     res.json(metrics.current());

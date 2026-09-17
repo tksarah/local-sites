@@ -5,6 +5,7 @@ import net from 'node:net';
 import type { Config } from './config.js';
 import type { Runner } from './docker.js';
 import { extractArchive } from './archive.js';
+import type { Previews } from './previews.js';
 
 type App = { id: string; port: number; image?: string; desired: 'running' | 'stopped'; url: string; deletedAt?: string; updatedAt?: string };
 type Job = { id: string; appId: string; uploadId: string; requestedBy: string; status: 'queued' | 'running' | 'succeeded' | 'failed'; createdAt: string; error?: string; url?: string };
@@ -12,6 +13,7 @@ type Upload = { owner: string; createdAt: number; consumed?: boolean };
 type State = { apps: Record<string, App>; jobs: Record<string, Job>; uploads: Record<string, Upload> };
 export const validId = (id: string) => /^[a-z][a-z0-9-]{0,39}$/.test(id) && !(id in Object.prototype);
 export class Manager {
+  previews?: Previews;
   state: State = { apps: {}, jobs: {}, uploads: {} };
   private tail: Promise<unknown> = Promise.resolve();
   private writes: Promise<unknown> = Promise.resolve();
@@ -123,7 +125,9 @@ export class Manager {
       const app = this.app(id); if (app.deletedAt) throw new Error('Deleted app: deploy again with the same ID to restore');
       if (!await this.inspect(id)) throw new Error('Container not created');
       await this.docker.run([running ? 'start' : 'stop', this.name(id)]);
-      app.desired = running ? 'running' : 'stopped'; await this.save(); return this.status(id);
+      app.desired = running ? 'running' : 'stopped'; await this.save();
+      if (running && this.previews?.info(id).state === 'missing') void this.previews.request(id).catch(() => {});
+      return this.status(id);
     });
   }
   async deleteApp(id: string, purge = false, confirmation = '') {
@@ -142,6 +146,7 @@ export class Manager {
         try { await this.docker.run(['volume', 'inspect', volume]); }
         catch (error: any) { if (/no such volume/i.test(error.message)) exists = false; else throw error; }
         if (exists) await this.docker.run(['volume', 'rm', volume]);
+        await this.previews?.remove(id);
         delete this.state.apps[id]; await this.save(); await this.syncGateway();
       }
       return { appId: id, deleted: true, dataRetained: !purge };
@@ -210,6 +215,7 @@ export class Manager {
     } finally {
       await this.save();
       await rm(archive, { force: true }); await rm(directory, { recursive: true, force: true });
+      if (job.status === 'succeeded') void this.previews?.request(job.appId, false, true).catch(() => {});
     }
   }
   async idle() { await this.tail; }

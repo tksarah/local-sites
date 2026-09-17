@@ -1,4 +1,11 @@
 services:
+  preview:
+    image: local-sites-preview:1
+    build:
+      context: ..
+      dockerfile: preview-worker/Dockerfile
+    profiles: [tools]
+    network_mode: none
   manager:
     build:
       context: ..

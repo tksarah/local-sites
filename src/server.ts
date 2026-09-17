@@ -15,6 +15,7 @@ import { Manager } from './manager.js';
 import { Docker } from './docker.js';
 import { portal } from './portal.js';
 import { Metrics } from './metrics.js';
+import { Previews } from './previews.js';
 
 export function createApp(config: Config, manager: Manager, metrics?: Metrics) {
   const app = express(); app.disable('x-powered-by');
@@ -68,10 +69,15 @@ export function createApp(config: Config, manager: Manager, metrics?: Metrics) {
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const config = configuration(), manager = new Manager(config, new Docker()); await manager.init();
+  const previews = new Previews(manager);
+  try {
+    await previews.init(); manager.previews = previews;
+    void previews.seed().catch(() => console.error('Preview initialization failed.'));
+  } catch { console.error('Preview storage unavailable; app management remains available.'); }
   const metrics = new Metrics(manager);
   try { await metrics.init(); } catch { console.error('Metrics history unavailable; app management remains available.'); }
   metrics.start();
   const server = createApp(config, manager, metrics).listen(config.port, config.bind, () => console.log(`local-sites listening on ${config.bind}:${config.port}`));
-  const shutdown = () => { server.close(); void metrics.stop().then(() => process.exit(0)); };
+  const shutdown = () => { server.close(); void Promise.all([metrics.stop(), previews.stop()]).then(() => process.exit(0)); };
   process.once('SIGTERM', shutdown); process.once('SIGINT', shutdown);
 }
